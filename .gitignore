@@ -1,0 +1,23 @@
+# Maven target directory
+/target/
+
+# IntelliJ / IDE files
+/.idea/
+*.iml
+
+# VS Code
+/.vscode/
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
+
+# Eclipse
+/.classpath
+/.project
+/.settings/
+
+# Temporary
+*.tmp
