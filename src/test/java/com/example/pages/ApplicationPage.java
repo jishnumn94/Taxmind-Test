@@ -23,15 +23,14 @@ public class ApplicationPage {
             String currentUrl = driver.getCurrentUrl();
             String baseUrl = currentUrl.replaceAll("(/profile.*|/$)", "");
             driver.navigate().to(baseUrl + "/application");
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-            // verify we're not on a 404 page by checking if page has application-related elements
-            try {
-                List<WebElement> appElements = driver.findElements(By.xpath("//*[contains(text(), '202') or contains(text(), 'application') or contains(text(), 'Application') or contains(text(), 'questionnaire') or contains(text(), 'Questionnaire')]"));
-                if (!appElements.isEmpty()) {
-                    return; // successfully loaded applications page
-                }
-            } catch (Exception ignored) {}
-        } catch (Exception ignored) {}
+            // Wait for application items to load
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//div[contains(@class, 'application-item')]")));
+            Thread.sleep(1000); // Additional wait for rendering
+            System.out.println("Successfully navigated to applications page via direct URL");
+            return;
+        } catch (Exception ex) {
+            System.out.println("Direct navigation failed: " + ex.getMessage());
+        }
 
         // Fallback: Try to click the user menu / username at top-right
         By[] userSelectors = new By[] {
@@ -63,8 +62,10 @@ public class ApplicationPage {
                 WebElement el = wait.until(ExpectedConditions.elementToBeClickable(sel));
                 if (el != null && el.isDisplayed()) {
                     el.click();
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
+                    // Wait for application items to load after clicking
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath("//div[contains(@class, 'application-item')]")));
                     Thread.sleep(1000);
+                    System.out.println("Successfully navigated to applications page via menu click");
                     return;
                 }
             } catch (Exception ignored) {
@@ -144,9 +145,10 @@ public class ApplicationPage {
                             System.out.println("Found Continue Application element: " + e.getText());
                             ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", e);
                             Thread.sleep(500);
-                            e.click();
+                            // Use JavaScript click to bypass overlay elements
+                            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", e);
                             wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
-                            Thread.sleep(1000);
+                            Thread.sleep(2000);
                             return;
                         }
                     } catch (Exception ex) {
