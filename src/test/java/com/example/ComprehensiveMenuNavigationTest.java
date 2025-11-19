@@ -67,21 +67,29 @@ public class ComprehensiveMenuNavigationTest extends BaseTest {
         try {
             System.out.println("Testing user menu items...");
             menuPage.openUserMenu();
-            
+
             var menuItems = menuPage.getMenuItems();
             System.out.println("Found " + menuItems.size() + " menu items");
-            
-            Map<String, String> navigationResults = menuPage.navigateAllMenuItems();
-            
+
+            Map<String, String[]> navigationResults = menuPage.navigateAllMenuItems();
+
             System.out.println("\nUser Menu Navigation Results:");
             int successCount = 0;
-            for (Map.Entry<String, String> entry : navigationResults.entrySet()) {
-                boolean isSuccess = !entry.getValue().startsWith("ERROR");
-                System.out.println("  ✓ " + entry.getKey() + " → " + entry.getValue());
-                if (isSuccess) successCount++;
+            for (Map.Entry<String, String[]> entry : navigationResults.entrySet()) {
+                String menuItem = entry.getKey();
+                String[] info = entry.getValue();
+                String url = info.length > 0 ? info[0] : "";
+                System.out.println("  ✓ " + menuItem + " → " + url);
+                if (!url.startsWith("ERROR")) successCount++;
             }
             System.out.println("Successful navigations: " + successCount + " / " + navigationResults.size());
-            
+
+            // Strict assertions for core menu items
+            assertTrue("Profile menu should exist", navigationResults.containsKey("Profile"));
+            assertTrue("Profile should navigate to /profile", navigationResults.get("Profile")[0].contains("/profile"));
+            assertTrue("Application menu should exist", navigationResults.containsKey("Application"));
+            assertTrue("Application should navigate to /application", navigationResults.get("Application")[0].contains("/application"));
+
         } catch (Exception e) {
             System.out.println("Error testing user menu: " + e.getMessage());
         }
@@ -115,6 +123,8 @@ public class ComprehensiveMenuNavigationTest extends BaseTest {
             }
             
             System.out.println("Total footer navigation items: " + footerResults.size());
+            // Strict check: contact us link should be present (either by text or URL)
+            assertTrue("Footer should contain Contact Us link", footerResults.containsKey("Contact Us") || footerResults.containsValue("https://dev.taxmind.ie/contact-us"));
             
         } catch (Exception e) {
             System.out.println("Error testing footer navigation: " + e.getMessage());
@@ -153,6 +163,8 @@ public class ComprehensiveMenuNavigationTest extends BaseTest {
             }
             
             System.out.println("Total unique action items: " + buttonCategories.size());
+            // Strict check: expect at least 'Questionnaire' or 'New Claim' action exists on application page
+            assertTrue("Application page should contain Questionnaire or New Claim action", buttonCategories.containsKey("Questionnaire") || buttonCategories.containsKey("New Claim"));
             
         } catch (Exception e) {
             System.out.println("Error testing application page sub-navigation: " + e.getMessage());

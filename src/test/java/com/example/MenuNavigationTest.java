@@ -53,30 +53,38 @@ public class MenuNavigationTest extends BaseTest {
 
             // Navigate through all menu items
             System.out.println("\n=== Navigating Through All Menu Items ===");
-            Map<String, String> navigationResults = menuPage.navigateAllMenuItems();
+            Map<String, String[]> navigationResults = menuPage.navigateAllMenuItems();
             
-            // Get unique pages and their content
+            // Get unique pages and their content (use title captured during navigation)
             System.out.println("\n=== Page Content Verification ===");
             Map<String, String> pageContents = new HashMap<>();
             for (String menuItem : navigationResults.keySet()) {
-                String url = navigationResults.get(menuItem);
+                String[] info = navigationResults.get(menuItem);
+                String url = info[0];
+                String title = info.length > 1 ? info[1] : "";
                 if (!url.startsWith("ERROR") && !pageContents.containsKey(url)) {
-                    String content = menuPage.getPageContent();
-                    pageContents.put(url, content);
+                    // store basic content
+                    pageContents.put(url, "Title: " + title);
                 }
             }
 
             // Print summary
             System.out.println("\n=== Detailed Navigation Summary ===");
             int successCount = 0;
-            for (Map.Entry<String, String> entry : navigationResults.entrySet()) {
-                System.out.println("\nMenu Item: '" + entry.getKey() + "'");
-                System.out.println("  Result URL: " + entry.getValue());
-                if (!entry.getValue().startsWith("ERROR")) {
+            for (Map.Entry<String, String[]> entry : navigationResults.entrySet()) {
+                String menuItem = entry.getKey();
+                String[] info = entry.getValue();
+                String url = info[0];
+                String title = info.length > 1 ? info[1] : "";
+                System.out.println("\nMenu Item: '" + menuItem + "'");
+                System.out.println("  Result URL: " + url);
+                if (!url.startsWith("ERROR")) {
                     successCount++;
-                    if (pageContents.containsKey(entry.getValue())) {
+                    if (pageContents.containsKey(url)) {
                         System.out.println("  Page Content:");
-                        System.out.println(pageContents.get(entry.getValue()));
+                        System.out.println(pageContents.get(url));
+                    } else {
+                        System.out.println("  Page Title: " + title);
                     }
                 }
             }
@@ -88,6 +96,12 @@ public class MenuNavigationTest extends BaseTest {
 
             // Assert that we successfully navigated to at least some pages
             assertTrue("Should have successfully navigated to at least one menu item", successCount > 0);
+
+            // Strict assertions for core menu items
+            assertTrue("Profile menu should exist", navigationResults.containsKey("Profile"));
+            assertTrue("Profile should navigate to /profile", navigationResults.get("Profile")[0].contains("/profile"));
+            assertTrue("Application menu should exist", navigationResults.containsKey("Application"));
+            assertTrue("Application should navigate to /application", navigationResults.get("Application")[0].contains("/application"));
 
         } catch (Exception e) {
             e.printStackTrace();

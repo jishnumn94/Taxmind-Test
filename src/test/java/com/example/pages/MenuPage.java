@@ -155,8 +155,9 @@ public class MenuPage {
     /**
      * Navigate through all menu items and return a map of menu item -> page URL
      */
-    public Map<String, String> navigateAllMenuItems() {
-        Map<String, String> menuNavigationMap = new HashMap<>();
+    public Map<String, String[]> navigateAllMenuItems() {
+        // return map: menuItem -> [0]=url, [1]=title
+        Map<String, String[]> menuNavigationMap = new HashMap<>();
         
         try {
             // Get unique menu items (remove duplicates)
@@ -196,13 +197,13 @@ public class MenuPage {
                     // Get page details
                     String pageUrl = getCurrentUrl();
                     String pageTitle = getCurrentPageTitle();
-                    
-                    menuNavigationMap.put(menuItem, pageUrl);
+
+                    menuNavigationMap.put(menuItem, new String[] { pageUrl, pageTitle });
                     System.out.println("✓ Menu item: '" + menuItem + "' → URL: " + pageUrl + " | Title: " + pageTitle);
                     
                 } catch (Exception e) {
                     System.out.println("✗ Failed to process menu item '" + menuItem + "': " + e.getMessage());
-                    menuNavigationMap.put(menuItem, "ERROR: " + e.getMessage());
+                    menuNavigationMap.put(menuItem, new String[] { "ERROR: " + e.getMessage(), "" });
                 }
             }
         } catch (Exception e) {
